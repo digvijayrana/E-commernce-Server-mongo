@@ -47,30 +47,34 @@ router.post('/register', async (req, res) => {
 
 //LOGIN
 router.post('/login', async (req, res) => {
-    await connectToDatabase()
-	const { email, password } = req.body
-	const user = await User.findOne({ email }).lean()
-
-	if (!user) {
-		return res.json({ status: false, error: 'Invalid email/password' })
-	}
-
-	if (await bcrypt.compare(password, user.password) && user.role ==='user') {
-		// the email, password combination is successful
-
-		const token = jwt.sign(
-			{
-				id: user._id,
-				email: user.email
-			},
-			JWT_SECRET,
-			{expiresIn:'1h'}
-		)
-
-		return res.json({ status: true, data: token,result:user })
-	}
-
-	res.json({ status: false, error: error.message })
+    try {
+        await connectToDatabase()
+        const { email, password } = req.body
+        console.log(email);
+        const user = await User.findOne({ email }).lean()  
+        if (!user) {
+            return res.json({ status: false, error: 'Invalid email/password' })
+        }
+    
+        if (await bcrypt.compare(password, user.password)) {
+            // the email, password combination is successful
+    
+            const token = jwt.sign(
+                {
+                    id: user._id,
+                    email: user.email
+                },
+                JWT_SECRET,
+                {expiresIn:'1h'}
+            )
+    
+            return res.json({ status: true, token: token,result:user })
+        }
+        
+    } catch (error) {
+         return res.json({ status: false, error: error.message })
+        
+    }
 })
 
 module.exports = router;
