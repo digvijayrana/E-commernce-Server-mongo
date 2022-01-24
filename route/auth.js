@@ -4,20 +4,20 @@ const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken");
 const {connectToDatabase} = require('../config/config')
 
+const JWT_SECRET = 'sdjkfh8923yhjdksbfma@#*(&@*!^#&@bhjb2qiuhesdbhjdsfg839ujkdhfjk'
+
 
 //REGISTER
 router.post('/register', async (req, res) => {
 	try {
-	const { username, password: plainTextPassword,email ,phone} = req.body
-
+        await connectToDatabase()
+	const { username, password: plainTextPassword,email,phone} = req.body
   if(phone.length<10 && phone.length>10){
     return res.json({ status: false, error: 'Invalid Phone' })
   }
-
 	if (!email || typeof email !== 'string') {
 		return res.json({ status: false, error: 'Invalid username' })
 	}
-
 	if (!plainTextPassword || typeof plainTextPassword !== 'string') {
 		return res.json({ status: false, error: 'Invalid password' })
 	}
@@ -30,11 +30,8 @@ router.post('/register', async (req, res) => {
 	}
 
 	const password = await bcrypt.hash(plainTextPassword, 10)
-
-	
-		const response = await User.create({
-			nusername,password,email
-		})
+		const response = await User.create({username,password,email,phone})
+        res.status(200).json({message:"User add Successgull",result:response})
 	} catch (error) {
 		if (error.code === 11000) {
 			// duplicate key
@@ -46,42 +43,34 @@ router.post('/register', async (req, res) => {
         message:error.message
     })
 	}
-
-	res.json({ status: true,message:'successfull' })
 })
 
 //LOGIN
 router.post('/login', async (req, res) => {
-    try {
-        await  connectToDatabase()
-        const user = await User.findOne(
-            {
-                userName: req.body.user_name
-            }
-        );
-        !user && res.status(401).json("Wrong User Name");
+    await connectToDatabase()
+	const { email, password } = req.body
+	const user = await User.findOne({ email }).lean()
 
-        const hashedPassword = CryptoJS.AES.decrypt(
-            user.password,
-            process.env.PASS_SEC
-        );
-        const originalPassword = hashedPassword.toString(CryptoJS.enc.Utf8);
-        const inputPassword = req.body.password;
-        originalPassword != inputPassword &&
-            res.status(401).json("Wrong Password");
-        const accessToken = jwt.sign(
-            {
-                id: user._id,
-                isAdmin: user.isAdmin,
-            },
-            process.env.JWT_SEC,
-            { expiresIn: "3d" }
-        );
-        const { password, ...others } = user._doc;
-        res.status(200).json({ ...others, accessToken });
-    } catch (err) {
-        res.status(500).json(err.message);
-    }
-});
+	if (!user) {
+		return res.json({ status: false, error: 'Invalid email/password' })
+	}
+
+	if (await bcrypt.compare(password, user.password) && user.role ==='user') {
+		// the email, password combination is successful
+
+		const token = jwt.sign(
+			{
+				id: user._id,
+				email: user.email
+			},
+			JWT_SECRET,
+			{expiresIn:'1h'}
+		)
+
+		return res.json({ status: true, data: token,result:user })
+	}
+
+	res.json({ status: false, error: error.message })
+})
 
 module.exports = router;

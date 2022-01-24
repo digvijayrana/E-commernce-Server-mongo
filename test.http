@@ -5,5 +5,15 @@ POST http://localhost:3000/api/auth/register
     "username":"Test1",
     "email":"test1@gmail",
     "password":"12345678",
-    "phone":9125883150
+    "phone":9125883150,
+    "isAdmin":"false"
+}
+
+###
+
+POST http://localhost:3000/api/auth/login
+
+{
+    "email":"test1@gmail",
+    "password":"12345678"
 }
