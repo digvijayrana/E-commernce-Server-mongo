@@ -2,9 +2,9 @@ const router = require("express").Router();
 const User = require("../model/User");
 const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken");
-const {connectToDatabase} = require('../config/config')
+const {connectToDatabase} = require('../config/config');
 
-const JWT_SECRET = 'sdjkfh8923yhjdksbfma@#*(&@*!^#&@bhjb2qiuhesdbhjdsfg839ujkdhfjk'
+const JWT_SECRET = process.env.JWT_SECRET
 
 
 //REGISTER
@@ -67,8 +67,8 @@ router.post('/login', async (req, res) => {
                 JWT_SECRET,
                 {expiresIn:'1h'}
             )
-    
-            return res.json({ status: true, token: token,result:user })
+              const{password, ...others}= user
+            return res.json({ status: true, token: token,result:others })
         }
         
     } catch (error) {
@@ -76,5 +76,34 @@ router.post('/login', async (req, res) => {
         
     }
 })
+
+router.post('/date',async(req,res)=>{
+  try {
+    await connectToDatabase()
+    let date = new Date();
+    let year = date.getFullYear();
+    let  month = date.getMonth()+1;
+    let day = date.getDate();
+     
+     if (day < 10) {
+       day = '0' + dt;
+     }
+     if (month < 10) {
+       month = '0' + month;
+     } 
+     let dates = year+month+day
+     console.log(year+'-' + month + '-'+day);
+     const response = await temp.create({$set:dates})
+     console.log(response)
+     return res.status(200).json(response)
+  } catch (error) {
+    
+   return res.status(401).json(error.message)
+  }
+
+
+
+})
+
 
 module.exports = router;
