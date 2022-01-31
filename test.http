@@ -17,3 +17,12 @@ POST http://localhost:3000/api/auth/login
     "email":"test1@gmail",
     "password":"12345678"
 }
+
+
+###
+
+GET http://localhost:3000/api/user/getAll
+
+{
+   
+}
