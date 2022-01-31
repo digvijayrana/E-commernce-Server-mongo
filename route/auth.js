@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken");
 const {connectToDatabase} = require('../config/config');
 
+
 const JWT_SECRET = process.env.JWT_SECRET
 
 
@@ -58,17 +59,18 @@ router.post('/login', async (req, res) => {
     
         if (await bcrypt.compare(password, user.password)) {
             // the email, password combination is successful
-    
             const token = jwt.sign(
                 {
                     id: user._id,
-                    email: user.email
+                    isAdmin: user.isAdmin,
                 },
                 JWT_SECRET,
                 {expiresIn:'1h'}
             )
               const{password, ...others}= user
             return res.json({ status: true, token: token,result:others })
+        }else{
+          return res.status(401).json('Wrong Password')
         }
         
     } catch (error) {
@@ -77,33 +79,7 @@ router.post('/login', async (req, res) => {
     }
 })
 
-router.post('/date',async(req,res)=>{
-  try {
-    await connectToDatabase()
-    let date = new Date();
-    let year = date.getFullYear();
-    let  month = date.getMonth()+1;
-    let day = date.getDate();
-     
-     if (day < 10) {
-       day = '0' + dt;
-     }
-     if (month < 10) {
-       month = '0' + month;
-     } 
-     let dates = year+month+day
-     console.log(year+'-' + month + '-'+day);
-     const response = await temp.create({$set:dates})
-     console.log(response)
-     return res.status(200).json(response)
-  } catch (error) {
-    
-   return res.status(401).json(error.message)
-  }
 
-
-
-})
 
 
 module.exports = router;

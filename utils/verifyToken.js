@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 
 
-async function authenticateToken(req, res, next) {
+const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
 
@@ -14,6 +14,26 @@ async function authenticateToken(req, res, next) {
         next()
     })
 }
- 
 
-module.exports = {authenticateToken}
+
+const verifyTokenAndAuthorization = async (req, res, next) => {
+    authenticateToken(req, res, () => {
+        if (req.user.id === req.params.id || req.user.isAdmin) {
+            next();
+        } else {
+            res.status(403).json("You are not alowed to do that!");
+        }
+    });
+};
+
+const verifyTokenAndAdmin = async (req, res, next) => {
+    authenticateToken(req, res, () => {
+        if (req.user.isAdmin) {
+            next();
+        } else {
+            res.status(403).json("You are not alowed to do that!");
+        }
+    });
+};
+
+module.exports = { authenticateToken, verifyTokenAndAuthorization, verifyTokenAndAdmin }
