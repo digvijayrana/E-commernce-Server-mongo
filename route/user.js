@@ -3,7 +3,7 @@ const helper = require('../utils/verifyToken')
 const bcrypt = require('bcryptjs')
 const User = require("../model/User");
 const { connectToDatabase } = require('../config/config');
-
+//edit 
 router.post('/update-password', helper.authenticateToken, async (req, res) => {
   await connectToDatabase()
   const { newpassword: plainTextPassword, email } = req.body
@@ -37,23 +37,20 @@ router.post('/update-password', helper.authenticateToken, async (req, res) => {
 })
 
 
-router.delete("/",helper.verifyTokenAndAuthorization, async (req, res) => {
+router.delete("/:id",helper.verifyTokenAndAuthorization, async (req, res) => {
   try {
     await connectToDatabase()
-    const {email} = req.body
-    const user = await User.findOne({ email }).lean()
-    console.log(user._id);
-    const deleteData = await User.findByIdAndDelete({ _id:user._id });
+    const user = await User.findById(req.params.id);
     return res.status(200).json("Delete Successfull")
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-router.get("/", helper.verifyTokenAndAdmin, async (req, res) => {
+router.get("/find/:id", helper.verifyTokenAndAdmin, async (req, res) => {
   try {
-    const {email}= rwq.body
-    const user = await User.findById({email});
+    await connectToDatabase()
+    const user = await User.findById(req.params.id);
     const { password, ...others } = user._doc;
     res.status(200).json(others);
   } catch (err) {
