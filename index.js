@@ -10,6 +10,8 @@ app.use(express.json());
 app.use('/api/auth',auth)
 app.use('/api/user',require('./route/user'))
 app.use('/api/product',require('./route/product'))
+app.use('/api/cart',require('./route/cart'))
+app.use('/api/order',require('./route/order'))
 app.listen(PORT,()=>{
     console.log(`Server is running ${PORT}`)
 })

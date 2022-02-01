@@ -19,6 +19,7 @@ router.post("/", helper.verifyTokenAndAdmin, async (req, res) => {
 //UPDATE
 router.put("/:id", helper.verifyTokenAndAdmin, async (req, res) => {
     try {
+        await connectToDatabase()
         const updatedProduct = await Product.findByIdAndUpdate(
             req.params.id,
             {
@@ -35,6 +36,7 @@ router.put("/:id", helper.verifyTokenAndAdmin, async (req, res) => {
 //DELETE
 router.delete("/:id", helper.verifyTokenAndAdmin, async (req, res) => {
     try {
+        await connectToDatabase()
         await Product.findByIdAndDelete(req.params.id);
         res.status(200).json("Product has been deleted...");
     } catch (err) {
@@ -45,6 +47,7 @@ router.delete("/:id", helper.verifyTokenAndAdmin, async (req, res) => {
 //GET PRODUCT
 router.get("/find/:id", async (req, res) => {
     try {
+        await connectToDatabase()
         const product = await Product.findById(req.params.id);
         res.status(200).json(product);
     } catch (err) {
@@ -56,7 +59,9 @@ router.get("/find/:id", async (req, res) => {
 router.get("/", async (req, res) => {
     const qNew = req.query.new;
     const qCategory = req.query.category;
+    console.log(qNew)
     try {
+        await connectToDatabase()
         let products;
 
         if (qNew) {
