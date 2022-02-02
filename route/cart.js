@@ -19,6 +19,7 @@ router.post("/", helper.authenticateToken, async (req, res) => {
 //UPDATE
 router.put("/:id", helper.verifyTokenAndAuthorization, async (req, res) => {
     try {
+        await connectToDatabase()
         const updatedCart = await Cart.findByIdAndUpdate(
             req.params.id,
             {
@@ -35,6 +36,7 @@ router.put("/:id", helper.verifyTokenAndAuthorization, async (req, res) => {
 //DELETE
 router.delete("/:id", helper.verifyTokenAndAuthorization, async (req, res) => {
     try {
+        await connectToDatabase()
         await Cart.findByIdAndDelete(req.params.id);
         res.status(200).json("Cart has been deleted...");
     } catch (err) {
@@ -45,6 +47,7 @@ router.delete("/:id", helper.verifyTokenAndAuthorization, async (req, res) => {
 //GET USER CART
 router.get("/find/:userId", helper.verifyTokenAndAuthorization, async (req, res) => {
     try {
+        await connectToDatabase()
         const cart = await Cart.findOne({ userId: req.params.userId });
         res.status(200).json(cart);
     } catch (err) {
@@ -56,6 +59,7 @@ router.get("/find/:userId", helper.verifyTokenAndAuthorization, async (req, res)
 
 router.get("/", helper.verifyTokenAndAdmin, async (req, res) => {
     try {
+        await connectToDatabase()
         const carts = await Cart.find();
         res.status(200).json(carts);
     } catch (err) {
